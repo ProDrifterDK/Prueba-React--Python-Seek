@@ -1,0 +1,63 @@
+service: task-management-system
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  environment:
+    MONGODB_URI: ${env:MONGODB_URI}
+    JWT_SECRET: ${env:JWT_SECRET}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: arn:aws:logs:*:*:*
+
+functions:
+  api:
+    handler: src/handler.handler
+    events:
+      - httpApi:
+          path: /auth/register
+          method: post
+      - httpApi:
+          path: /auth/login
+          method: post
+      - httpApi:
+          path: /auth/me
+          method: get
+      - httpApi:
+          path: /tasks
+          method: get
+      - httpApi:
+          path: /tasks
+          method: post
+      - httpApi:
+          path: /tasks/{id}
+          method: get
+      - httpApi:
+          path: /tasks/{id}
+          method: put
+      - httpApi:
+          path: /tasks/{id}
+          method: delete
+      - httpApi:
+          path: /tasks/stats
+          method: get
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
+    layer: true
+  dotenv:
+    path: .env
