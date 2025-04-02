@@ -1,0 +1,109 @@
+service: task-management-system-boto3
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: ${opt:stage, 'prod'}
+  region: us-east-1
+  environment:
+    JWT_SECRET: ${env:JWT_SECRET, '8f42a31e9b5d4c7a6e2d1f0b5c8a7e6d4b2c1a3f5e8d7c6b9a0f1e2d3c4b5a6'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+        - Effect: Allow
+          Action:
+            - dynamodb:CreateTable
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:ListTables
+          Resource: 
+            - "*"
+
+functions:
+  # Setup function
+  setup:
+    handler: src/setup.lambda_handler
+    events:
+      - httpApi:
+          path: /setup
+          method: post
+
+  # Auth functions
+  register:
+    handler: src/auth/register.lambda_handler
+    events:
+      - httpApi:
+          path: /auth/register
+          method: post
+ECHO est  desactivado.
+  login:
+    handler: src/auth/login.lambda_handler
+    events:
+      - httpApi:
+          path: /auth/login
+          method: post
+ECHO est  desactivado.
+  # Tasks functions
+  getTasks:
+    handler: src/tasks/get_tasks.lambda_handler
+    events:
+      - httpApi:
+          path: /tasks
+          method: get
+ECHO est  desactivado.
+  createTask:
+    handler: src/tasks/create_task.lambda_handler
+    events:
+      - httpApi:
+          path: /tasks
+          method: post
+ECHO est  desactivado.
+  getTask:
+    handler: src/tasks/get_task.lambda_handler
+    events:
+      - httpApi:
+          path: /tasks/{id}
+          method: get
+ECHO est  desactivado.
+  updateTask:
+    handler: src/tasks/update_task.lambda_handler
+    events:
+      - httpApi:
+          path: /tasks/{id}
+          method: put
+ECHO est  desactivado.
+  deleteTask:
+    handler: src/tasks/delete_task.lambda_handler
+    events:
+      - httpApi:
+          path: /tasks/{id}
+          method: delete
+ECHO est  desactivado.
+  getTaskStats:
+    handler: src/tasks/get_stats.lambda_handler
+    events:
+      - httpApi:
+          path: /tasks/stats
+          method: get
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
+    layer: true

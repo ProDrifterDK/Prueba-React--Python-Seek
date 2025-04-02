@@ -39,11 +39,40 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
       - backend
     networks:
       - app-network
+
+  # Mobile app service (Expo with Express)
+  mobile-app:
+    build:
+      context: ./TaskManagerApp
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: task-management-mobile-app
+    restart: always
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "8081:8081"
+    environment:
+      - API_URL=http://backend:8000
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - NODE_ENV=development
+      - CI=1
+      - REACT_NATIVE_PACKAGER_HOSTNAME=${HOST_IP:-host.docker.internal}
+    volumes:
+      - ./TaskManagerApp:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 # Volumes
 volumes:

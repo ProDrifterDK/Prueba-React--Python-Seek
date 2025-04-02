@@ -1,63 +1,109 @@
-service: task-management-system
+service: task-management-system-boto3
 
-frameworkVersion: '3'
+frameworkVersion: '4'
 
 provider:
   name: aws
   runtime: python3.9
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'prod'}
   region: us-east-1
   environment:
-    MONGODB_URI: ${env:MONGODB_URI}
-    JWT_SECRET: ${env:JWT_SECRET}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - logs:CreateLogGroup
-        - logs:CreateLogStream
-        - logs:PutLogEvents
-      Resource: arn:aws:logs:*:*:*
+    JWT_SECRET: ${env:JWT_SECRET, '8f42a31e9b5d4c7a6e2d1f0b5c8a7e6d4b2c1a3f5e8d7c6b9a0f1e2d3c4b5a6'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+        - Effect: Allow
+          Action:
+            - dynamodb:CreateTable
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:ListTables
+          Resource:
+            - "*"
 
 functions:
-  api:
-    handler: src/handler.handler
+  # Setup function
+  setup:
+    handler: setup.lambda_handler
+    events:
+      - httpApi:
+          path: /setup
+          method: post
+
+  # Auth functions
+  register:
+    handler: auth/register.lambda_handler
     events:
       - httpApi:
           path: /auth/register
           method: post
+
+  login:
+    handler: auth/login.lambda_handler
+    events:
       - httpApi:
           path: /auth/login
           method: post
-      - httpApi:
-          path: /auth/me
-          method: get
+
+  # Tasks functions
+  getTasks:
+    handler: tasks/get_tasks.lambda_handler
+    events:
       - httpApi:
           path: /tasks
           method: get
+
+  createTask:
+    handler: tasks/create_task.lambda_handler
+    events:
       - httpApi:
           path: /tasks
           method: post
+
+  getTask:
+    handler: tasks/get_task.lambda_handler
+    events:
       - httpApi:
           path: /tasks/{id}
           method: get
+
+  updateTask:
+    handler: tasks/update_task.lambda_handler
+    events:
       - httpApi:
           path: /tasks/{id}
           method: put
+
+  deleteTask:
+    handler: tasks/delete_task.lambda_handler
+    events:
       - httpApi:
           path: /tasks/{id}
           method: delete
+
+  getTaskStats:
+    handler: tasks/get_stats.lambda_handler
+    events:
       - httpApi:
           path: /tasks/stats
           method: get
 
 plugins:
   - serverless-python-requirements
-  - serverless-dotenv-plugin
 
 custom:
   pythonRequirements:
     dockerizePip: true
     slim: true
     layer: true
-  dotenv:
-    path: .env
