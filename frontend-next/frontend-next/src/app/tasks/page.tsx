@@ -75,7 +75,7 @@ export default function TaskList() {
 
   const handleTaskUpdated = (updatedTask: Task) => {
     setTasks(prevTasks =>
-      prevTasks.map(task => (task.id === updatedTask.id ? updatedTask : task))
+      prevTasks.map(task => (task.task_id === updatedTask.task_id ? updatedTask : task))
     );
     setSnackbar({
       open: true,
@@ -85,7 +85,7 @@ export default function TaskList() {
   };
 
   const handleTaskDeleted = (taskId: string) => {
-    setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    setTasks(prevTasks => prevTasks.filter(task => task.task_id !== taskId));
     setSnackbar({
       open: true,
       message: 'Task deleted successfully!',
@@ -190,7 +190,7 @@ export default function TaskList() {
                         ) : (
                           getTasksByStatus(column.id).map((task, index) => (
                             <Box
-                              key={`${task.id}-${task.status}`}
+                              key={`${task.task_id}-${task.status}`}
                               sx={{
                                 ...taskAnimationStyles.task,
                                 animation: `fadeIn 0.5s ease-in-out ${index * 0.1}s both`,

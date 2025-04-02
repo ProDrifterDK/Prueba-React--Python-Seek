@@ -60,7 +60,7 @@ const TaskListScreen = ({ navigation }) => {
           onPress: async () => {
             try {
               await deleteTask(taskId);
-              setTasks(tasks.filter(task => task.id !== taskId));
+              setTasks(tasks.filter(task => task.task_id !== taskId));
             } catch (error) {
               console.error('Error deleting task:', error);
             }
@@ -72,8 +72,8 @@ const TaskListScreen = ({ navigation }) => {
 
   const handleUpdateStatus = async (task, newStatus) => {
     try {
-      const updatedTask = await updateTask(task.id, { ...task, status: newStatus });
-      setTasks(tasks.map(t => (t.id === updatedTask.id ? updatedTask : t)));
+      const updatedTask = await updateTask(task.task_id, { ...task, status: newStatus });
+      setTasks(tasks.map(t => (t.task_id === updatedTask.task_id ? updatedTask : t)));
       setMenuVisible(false);
     } catch (error) {
       console.error('Error updating task status:', error);
@@ -158,7 +158,7 @@ const TaskListScreen = ({ navigation }) => {
         </Button>
         <Button
           mode="text"
-          onPress={() => handleDeleteTask(item.id)}
+          onPress={() => handleDeleteTask(item.task_id)}
           icon={({ size, color }) => (
             <MaterialCommunityIcons name="delete" size={size} color={color} />
           )}
@@ -242,7 +242,7 @@ const TaskListScreen = ({ navigation }) => {
       <FlatList
         data={filteredTasks}
         renderItem={renderTaskItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.task_id}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={fetchTasks} />

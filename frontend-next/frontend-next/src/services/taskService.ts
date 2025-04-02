@@ -4,7 +4,8 @@ import { useState, useCallback } from 'react';
 import axios, { AxiosError } from 'axios';
 
 export interface Task {
-  id: string;
+  task_id: string;  // Updated from 'id' to 'task_id' to match AWS API
+  user_id?: string; // Added to match AWS API
   title: string;
   description: string;
   status: 'todo' | 'in_progress' | 'completed';
@@ -13,12 +14,10 @@ export interface Task {
 }
 
 export interface TaskStats {
-  statusCounts: {
-    todo: number;
-    in_progress: number;
-    completed: number;
-  };
-  totalTasks: number;
+  total: number;     // Updated to match AWS API
+  todo: number;
+  in_progress: number;
+  completed: number;
 }
 
 interface ErrorResponse {
@@ -63,7 +62,7 @@ export const useTaskService = () => {
     }
   }, []);
 
-  const createTask = useCallback(async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at'>): Promise<Task> => {
+  const createTask = useCallback(async (taskData: Omit<Task, 'task_id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Task> => {
     setLoading(true);
     setError(null);
     
@@ -115,29 +114,22 @@ export const useTaskService = () => {
   }, []);
 
   const getTaskStats = useCallback(async (): Promise<TaskStats> => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      const tasks = await getTasks();
-      
-      const statusCounts = {
-        todo: 0,
-        in_progress: 0,
-        completed: 0,
-      };
-      
-      tasks.forEach(task => {
-        if (statusCounts.hasOwnProperty(task.status)) {
-          statusCounts[task.status]++;
-        }
-      });
-      
-      return {
-        statusCounts,
-        totalTasks: tasks.length,
-      };
+      // Use the dedicated stats endpoint instead of calculating client-side
+      const response = await axios.get('/tasks/stats');
+      return response.data;
     } catch (err) {
-      throw err;
+      const error = err as AxiosError<ErrorResponse>;
+      const errorMessage = error.response?.data?.message || 'Failed to fetch task statistics';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
     }
-  }, [getTasks]);
+  }, []);
 
   return {
     loading,

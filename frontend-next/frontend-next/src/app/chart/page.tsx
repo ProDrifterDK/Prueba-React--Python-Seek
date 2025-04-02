@@ -41,9 +41,9 @@ export default function TaskChart() {
       datasets: [
         {
           data: [
-            taskStats.statusCounts.todo,
-            taskStats.statusCounts.in_progress,
-            taskStats.statusCounts.completed,
+            taskStats.todo,
+            taskStats.in_progress,
+            taskStats.completed,
           ],
           backgroundColor: [
             'rgba(255, 99, 132, 0.6)',
@@ -79,8 +79,8 @@ export default function TaskChart() {
       datasets: [
         {
           data: [
-            taskStats.statusCounts.completed,
-            taskStats.statusCounts.todo + taskStats.statusCounts.in_progress,
+            taskStats.completed,
+            taskStats.todo + taskStats.in_progress,
           ],
           backgroundColor: [
             'rgba(75, 192, 192, 0.6)',
@@ -112,7 +112,7 @@ export default function TaskChart() {
             <Alert severity="error" sx={{ mt: 2 }}>
               {error}
             </Alert>
-          ) : !taskStats || taskStats.totalTasks === 0 ? (
+          ) : !taskStats || taskStats.total === 0 ? (
             <Alert severity="info" sx={{ mt: 2 }}>
               No tasks found. Add some tasks to see statistics.
             </Alert>
@@ -138,7 +138,7 @@ export default function TaskChart() {
             </Box>
           )}
           
-          {taskStats && taskStats.totalTasks > 0 && (
+          {taskStats && taskStats.total > 0 && (
             <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
               <Typography variant="h6" gutterBottom>
                 Summary
@@ -157,7 +157,7 @@ export default function TaskChart() {
                   }}
                 >
                   <Typography variant="h4">
-                    {taskStats.statusCounts.todo}
+                    {taskStats.todo}
                   </Typography>
                   <Typography variant="body2">To Do</Typography>
                 </Paper>
@@ -170,7 +170,7 @@ export default function TaskChart() {
                   }}
                 >
                   <Typography variant="h4">
-                    {taskStats.statusCounts.in_progress}
+                    {taskStats.in_progress}
                   </Typography>
                   <Typography variant="body2">In Progress</Typography>
                 </Paper>
@@ -183,7 +183,7 @@ export default function TaskChart() {
                   }}
                 >
                   <Typography variant="h4">
-                    {taskStats.statusCounts.completed}
+                    {taskStats.completed}
                   </Typography>
                   <Typography variant="body2">Completed</Typography>
                 </Paper>
@@ -196,7 +196,7 @@ export default function TaskChart() {
                   }}
                 >
                   <Typography variant="h4">
-                    {taskStats.totalTasks}
+                    {taskStats.total}
                   </Typography>
                   <Typography variant="body2">Total Tasks</Typography>
                 </Paper>

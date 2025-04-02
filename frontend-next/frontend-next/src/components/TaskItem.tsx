@@ -49,7 +49,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskUpdated, onTaskDeleted 
     setIsAnimating(true);
     
     try {
-      const updatedTask = await updateTask(task.id, { ...task, status: newStatus });
+      const updatedTask = await updateTask(task.task_id, { ...task, status: newStatus });
       onTaskUpdated(updatedTask);
       
       setTimeout(() => {
@@ -72,8 +72,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onTaskUpdated, onTaskDeleted 
 
   const handleConfirmDelete = async () => {
     try {
-      await deleteTask(task.id);
-      onTaskDeleted(task.id);
+      await deleteTask(task.task_id);
+      onTaskDeleted(task.task_id);
       setOpenDialog(false);
     } catch (error) {
       console.error('Error deleting task:', error);

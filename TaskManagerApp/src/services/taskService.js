@@ -19,21 +19,21 @@ api.interceptors.request.use(async (config) => {
 
 /**
  * @typedef {Object} Task
- * @property {string} id
- * @property {string} title
- * @property {string} description
- * @property {'todo' | 'in_progress' | 'completed'} status
- * @property {string} created_at
- * @property {string} updated_at
+ * @property {string} task_id - Task ID (updated from 'id' to match AWS API)
+ * @property {string} user_id - User ID (added to match AWS API)
+ * @property {string} title - Task title
+ * @property {string} description - Task description
+ * @property {'todo' | 'in_progress' | 'completed'} status - Task status
+ * @property {string} created_at - Creation timestamp
+ * @property {string} updated_at - Last update timestamp
  */
 
 /**
  * @typedef {Object} TaskStats
- * @property {Object} statusCounts
- * @property {number} statusCounts.todo
- * @property {number} statusCounts.in_progress
- * @property {number} statusCounts.completed
- * @property {number} totalTasks
+ * @property {number} total - Total number of tasks (updated to match AWS API)
+ * @property {number} todo - Number of todo tasks
+ * @property {number} in_progress - Number of in-progress tasks
+ * @property {number} completed - Number of completed tasks
  */
 
 export const useTaskService = () => {
@@ -153,29 +153,21 @@ export const useTaskService = () => {
    * @returns {Promise<TaskStats>}
    */
   const getTaskStats = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      const tasks = await getTasks();
-      
-      const statusCounts = {
-        todo: 0,
-        in_progress: 0,
-        completed: 0,
-      };
-      
-      tasks.forEach(task => {
-        if (statusCounts.hasOwnProperty(task.status)) {
-          statusCounts[task.status]++;
-        }
-      });
-      
-      return {
-        statusCounts,
-        totalTasks: tasks.length,
-      };
+      // Use the dedicated stats endpoint instead of calculating client-side
+      const response = await api.get('/tasks/stats');
+      return response.data;
     } catch (err) {
+      const errorMessage = err.response?.data?.message || 'Failed to fetch task statistics';
+      setError(errorMessage);
       throw err;
+    } finally {
+      setLoading(false);
     }
-  }, [getTasks]);
+  }, []);
 
   return {
     loading,
