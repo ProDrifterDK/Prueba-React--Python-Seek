@@ -68,12 +68,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskAdded }) => {
         status,
       });
       
-      // Reset form
       setTitle('');
       setDescription('');
       setStatus('todo');
       
-      // Notify parent component
       onTaskAdded(newTask);
     } catch (error) {
       console.error('Error creating task:', error);

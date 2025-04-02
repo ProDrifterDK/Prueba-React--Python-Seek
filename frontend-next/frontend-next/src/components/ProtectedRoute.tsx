@@ -16,7 +16,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      // Redirect to login page with return URL
       router.push(`/auth/login?returnUrl=${encodeURIComponent(pathname)}`);
     }
   }, [isAuthenticated, loading, router, pathname]);
@@ -36,7 +35,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Only render children if authenticated
   return isAuthenticated ? <>{children}</> : null;
 };
 

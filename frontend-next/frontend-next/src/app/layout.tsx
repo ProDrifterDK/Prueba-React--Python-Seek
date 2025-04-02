@@ -9,7 +9,6 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Create a theme instance
 const theme = createTheme({
   palette: {
     primary: {

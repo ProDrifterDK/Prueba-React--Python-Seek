@@ -4,7 +4,6 @@ import React, { createContext, useState, useContext, useEffect, ReactNode, useCa
 import axios, { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 
-// Set default base URL for API requests
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000';
 
 interface User {
@@ -48,10 +47,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Check if user is authenticated
   const isAuthenticated = !!token;
 
-  // Logout function defined with useCallback to avoid dependency issues
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
@@ -59,7 +56,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     router.push('/auth/login');
   }, [router]);
 
-  // Set up axios interceptor for authentication
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -78,19 +74,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
   }, [token]);
 
-  // Load user data if token exists
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     const loadUser = async () => {
       if (token) {
         try {
-          // Get user data from token
           const response = await axios.get('/auth/me');
           setCurrentUser(response.data);
         } catch (error) {
           console.error('Error loading user:', error);
-          // If token is invalid, clear it
           logout();
         } finally {
           setLoading(false);
@@ -103,13 +96,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadUser();
   }, [token, logout]);
 
-  // Login function
   const login = async (credentials: { username: string; password: string }) => {
     try {
       const response = await axios.post('/auth/login', credentials);
       const { token, user } = response.data;
       
-      // Save token to localStorage
       localStorage.setItem('token', token);
       setToken(token);
       setCurrentUser(user);
@@ -122,7 +113,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Register function
   const register = async (userData: { username: string; email: string; password: string }) => {
     try {
       console.log('Registering user with data:', userData);

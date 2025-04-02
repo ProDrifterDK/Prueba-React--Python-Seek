@@ -37,7 +37,6 @@ export default function Register() {
       return false;
     }
     
-    // Simple email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
@@ -62,7 +61,6 @@ export default function Register() {
       await register({ username, email, password });
       setSuccess(true);
       
-      // Redirect to login page after a short delay
       setTimeout(() => {
         router.push('/auth/login');
       }, 2000);

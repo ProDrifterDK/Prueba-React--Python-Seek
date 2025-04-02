@@ -1,7 +1,11 @@
 import os
-from pymongo import MongoClient
-from pymongo.database import Database
-from pymongo.collection import Collection
+import motor.motor_asyncio
+from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Get MongoDB URI from environment variable with a default value
 MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://mongodb:27017/task-management")
@@ -9,23 +13,29 @@ MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://mongodb:27017/task-manage
 # MongoDB client instance
 client = None
 
-def get_database() -> Database:
+def get_database() -> AsyncIOMotorDatabase:
     """
     Get MongoDB database instance.
     
     Returns:
-        Database: MongoDB database instance
+        AsyncIOMotorDatabase: MongoDB database instance
     """
     global client
     
     if client is None:
-        # Create MongoDB client
-        client = MongoClient(MONGODB_URI)
+        try:
+            # Create MongoDB client
+            logger.info(f"Connecting to MongoDB at {MONGODB_URI}")
+            client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URI)
+            logger.info("MongoDB connection established")
+        except Exception as e:
+            logger.error(f"Error connecting to MongoDB: {str(e)}", exc_info=True)
+            raise
     
     # Return database instance
     return client.task_management
 
-def get_collection(collection_name: str) -> Collection:
+def get_collection(collection_name: str) -> AsyncIOMotorCollection:
     """
     Get MongoDB collection instance.
     
@@ -33,17 +43,23 @@ def get_collection(collection_name: str) -> Collection:
         collection_name (str): Name of the collection
         
     Returns:
-        Collection: MongoDB collection instance
+        AsyncIOMotorCollection: MongoDB collection instance
     """
-    db = get_database()
-    return db[collection_name]
+    try:
+        db = get_database()
+        logger.info(f"Getting collection: {collection_name}")
+        return db[collection_name]
+    except Exception as e:
+        logger.error(f"Error getting collection {collection_name}: {str(e)}", exc_info=True)
+        raise
 
-def close_connection():
+async def close_connection():
     """
     Close MongoDB connection.
     """
     global client
     
     if client is not None:
+        logger.info("Closing MongoDB connection")
         client.close()
         client = None

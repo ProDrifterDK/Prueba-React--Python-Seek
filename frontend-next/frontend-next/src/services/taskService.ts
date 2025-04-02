@@ -25,12 +25,10 @@ interface ErrorResponse {
   message?: string;
 }
 
-// Custom hook for task service
 export const useTaskService = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Get all tasks
   const getTasks = useCallback(async (): Promise<Task[]> => {
     setLoading(true);
     setError(null);
@@ -48,7 +46,6 @@ export const useTaskService = () => {
     }
   }, []);
 
-  // Get task by ID
   const getTaskById = useCallback(async (taskId: string): Promise<Task> => {
     setLoading(true);
     setError(null);
@@ -66,7 +63,6 @@ export const useTaskService = () => {
     }
   }, []);
 
-  // Create new task
   const createTask = useCallback(async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at'>): Promise<Task> => {
     setLoading(true);
     setError(null);
@@ -84,7 +80,6 @@ export const useTaskService = () => {
     }
   }, []);
 
-  // Update task
   const updateTask = useCallback(async (taskId: string, taskData: Partial<Task>): Promise<Task> => {
     setLoading(true);
     setError(null);
@@ -102,7 +97,6 @@ export const useTaskService = () => {
     }
   }, []);
 
-  // Delete task
   const deleteTask = useCallback(async (taskId: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
@@ -120,12 +114,10 @@ export const useTaskService = () => {
     }
   }, []);
 
-  // Get task statistics
   const getTaskStats = useCallback(async (): Promise<TaskStats> => {
     try {
       const tasks = await getTasks();
       
-      // Count tasks by status
       const statusCounts = {
         todo: 0,
         in_progress: 0,

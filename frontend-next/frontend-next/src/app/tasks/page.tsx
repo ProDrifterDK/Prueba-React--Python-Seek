@@ -8,25 +8,40 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
+  Paper,
 } from '@mui/material';
 import TaskItem from '../../components/TaskItem';
 import TaskForm from '../../components/TaskForm';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { useTaskService, Task } from '../../services/taskService';
 
+const COLUMNS = [
+  { id: 'todo', title: 'To Do', color: '#ffebee' },
+  { id: 'in_progress', title: 'In Progress', color: '#e3f2fd' },
+  { id: 'completed', title: 'Completed', color: '#e8f5e9' },
+];
+
+const taskAnimationStyles = {
+  task: {
+    opacity: 1,
+    transform: 'scale(1)',
+    transition: 'all 0.5s ease-in-out',
+  },
+  enter: {
+    opacity: 0,
+    transform: 'scale(0.8)',
+  },
+  exit: {
+    opacity: 0,
+    transform: 'scale(0.8)',
+  },
+};
+
 export default function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [filter, setFilter] = useState('all');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const { getTasks, loading, error } = useTaskService();
 
-  // Define fetchTasks as a useCallback to avoid dependency issues
   const fetchTasks = useCallback(async () => {
     try {
       const data = await getTasks();
@@ -41,19 +56,13 @@ export default function TaskList() {
     }
   }, [getTasks]);
 
-  // Fetch tasks on component mount
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
-  // Apply filter when tasks or filter changes
-  useEffect(() => {
-    if (filter === 'all') {
-      setFilteredTasks(tasks);
-    } else {
-      setFilteredTasks(tasks.filter(task => task.status === filter));
-    }
-  }, [tasks, filter]);
+  const getTasksByStatus = (status: string) => {
+    return tasks.filter(task => task.status === status);
+  };
 
   const handleTaskAdded = (newTask: Task) => {
     setTasks(prevTasks => [...prevTasks, newTask]);
@@ -84,17 +93,13 @@ export default function TaskList() {
     });
   };
 
-  const handleFilterChange = (event: SelectChangeEvent) => {
-    setFilter(event.target.value);
-  };
-
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
   return (
     <ProtectedRoute>
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <Box sx={{ mt: 4, mb: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Task Management
@@ -102,27 +107,9 @@ export default function TaskList() {
 
           <TaskForm onTaskAdded={handleTaskAdded} />
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Typography variant="h5" component="h2">
-              Your Tasks
-            </Typography>
-            
-            <FormControl sx={{ minWidth: 150 }}>
-              <InputLabel id="filter-label">Filter</InputLabel>
-              <Select
-                labelId="filter-label"
-                id="filter-select"
-                value={filter}
-                label="Filter"
-                onChange={handleFilterChange}
-              >
-                <MenuItem value="all">All Tasks</MenuItem>
-                <MenuItem value="todo">To Do</MenuItem>
-                <MenuItem value="in_progress">In Progress</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          <Typography variant="h5" component="h2" sx={{ mb: 3 }}>
+            Your Tasks
+          </Typography>
 
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -132,22 +119,106 @@ export default function TaskList() {
             <Alert severity="error" sx={{ mt: 2 }}>
               {error}
             </Alert>
-          ) : filteredTasks.length === 0 ? (
+          ) : tasks.length === 0 ? (
             <Alert severity="info" sx={{ mt: 2 }}>
-              {tasks.length === 0
-                ? 'No tasks found. Add your first task above!'
-                : 'No tasks match the selected filter.'}
+              No tasks found. Add your first task above!
             </Alert>
           ) : (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
-              {filteredTasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  onTaskUpdated={handleTaskUpdated}
-                  onTaskDeleted={handleTaskDeleted}
-                />
-              ))}
+            <Box sx={{ mt: 4 }}>
+              {/* Kanban Board */}
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: 2
+                }}
+              >
+                {COLUMNS.map(column => (
+                  <Box 
+                    key={column.id} 
+                    sx={{ 
+                      flex: 1,
+                      width: { xs: '100%', md: '33.33%' }
+                    }}
+                  >
+                    <Paper 
+                      elevation={2} 
+                      sx={{ 
+                        p: 2, 
+                        height: '100%',
+                        backgroundColor: column.color,
+                        borderRadius: '8px',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          mb: 2, 
+                          pb: 1, 
+                          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+                          fontWeight: 'bold',
+                          textAlign: 'center'
+                        }}
+                      >
+                        {column.title} ({getTasksByStatus(column.id).length})
+                      </Typography>
+                      
+                      <Box 
+                        sx={{ 
+                          flexGrow: 1,
+                          minHeight: '500px',
+                          overflowY: 'auto',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2
+                        }}
+                      >
+                        {getTasksByStatus(column.id).length === 0 ? (
+                          <Box 
+                            sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'center', 
+                              alignItems: 'center',
+                              height: '100%',
+                              opacity: 0.5
+                            }}
+                          >
+                            <Typography>No tasks in this column</Typography>
+                          </Box>
+                        ) : (
+                          getTasksByStatus(column.id).map((task, index) => (
+                            <Box
+                              key={`${task.id}-${task.status}`}
+                              sx={{
+                                ...taskAnimationStyles.task,
+                                animation: `fadeIn 0.5s ease-in-out ${index * 0.1}s both`,
+                                '@keyframes fadeIn': {
+                                  '0%': {
+                                    opacity: 0,
+                                    transform: 'translateY(20px) scale(0.9)',
+                                  },
+                                  '100%': {
+                                    opacity: 1,
+                                    transform: 'translateY(0) scale(1)',
+                                  },
+                                },
+                              }}
+                            >
+                              <TaskItem
+                                task={task}
+                                onTaskUpdated={handleTaskUpdated}
+                                onTaskDeleted={handleTaskDeleted}
+                              />
+                            </Box>
+                          ))
+                        )}
+                      </Box>
+                    </Paper>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           )}
         </Box>

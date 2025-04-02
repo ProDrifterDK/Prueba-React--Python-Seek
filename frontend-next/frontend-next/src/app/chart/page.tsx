@@ -14,14 +14,12 @@ import { Pie, Doughnut } from 'react-chartjs-2';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { useTaskService, TaskStats } from '../../services/taskService';
 
-// Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function TaskChart() {
   const [taskStats, setTaskStats] = useState<TaskStats | null>(null);
   const { getTaskStats, loading, error } = useTaskService();
 
-  // Define fetchTaskStats as a useCallback to avoid dependency issues
   const fetchTaskStats = useCallback(async () => {
     try {
       const stats = await getTaskStats();
@@ -35,7 +33,6 @@ export default function TaskChart() {
     fetchTaskStats();
   }, [fetchTaskStats]);
 
-  // Prepare chart data
   const getPieChartData = () => {
     if (!taskStats) return null;
     
@@ -49,9 +46,9 @@ export default function TaskChart() {
             taskStats.statusCounts.completed,
           ],
           backgroundColor: [
-            'rgba(255, 99, 132, 0.6)',  // Red for To Do
-            'rgba(54, 162, 235, 0.6)',  // Blue for In Progress
-            'rgba(75, 192, 192, 0.6)',  // Green for Completed
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(75, 192, 192, 0.6)',
           ],
           borderColor: [
             'rgba(255, 99, 132, 1)',
@@ -64,7 +61,6 @@ export default function TaskChart() {
     };
   };
 
-  // Chart options
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -87,8 +83,8 @@ export default function TaskChart() {
             taskStats.statusCounts.todo + taskStats.statusCounts.in_progress,
           ],
           backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',  // Green for Completed
-            'rgba(201, 203, 207, 0.6)', // Grey for Not Completed
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(201, 203, 207, 0.6)',
           ],
           borderColor: [
             'rgba(75, 192, 192, 1)',

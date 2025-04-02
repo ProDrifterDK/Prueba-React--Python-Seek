@@ -11,7 +11,6 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // If user is already authenticated, redirect to tasks page
     if (isAuthenticated) {
       router.push('/tasks');
     }

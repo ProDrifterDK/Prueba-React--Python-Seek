@@ -20,7 +20,6 @@ interface ErrorResponse {
   message?: string;
 }
 
-// Component to handle search params
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -29,8 +28,7 @@ function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
   
-  // Get return URL from query params
-  const returnUrl = '/tasks'; // Default to tasks page
+  const returnUrl = '/tasks';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,7 +125,6 @@ function LoginForm() {
   );
 }
 
-// Loading fallback
 function LoginLoading() {
   return (
     <Container maxWidth="xs">
